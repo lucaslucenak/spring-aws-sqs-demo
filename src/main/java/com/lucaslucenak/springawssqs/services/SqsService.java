@@ -4,10 +4,12 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,28 +24,27 @@ public class SqsService {
     @Value("${aws.sqs.queueUrl}")
     private String queueUrl;
 
-    public void sendMessage(String message) {
+    public SendMessageResult sendMessage(Object message) {
         SendMessageRequest request = new SendMessageRequest()
                 .withQueueUrl(queueUrl)
-                .withMessageBody(message);
-        amazonSQS.sendMessage(request);
+                .withMessageBody(message.toString());
+        return amazonSQS.sendMessage(request);
     }
 
-    public String receiveMessages(Integer maxNumberOfMessages) {
+    public List<String> receiveMessages(Integer maxNumberOfMessages) {
         ReceiveMessageRequest request = new ReceiveMessageRequest()
                 .withQueueUrl(queueUrl)
                 .withMaxNumberOfMessages(maxNumberOfMessages);
         List<Message> messages = amazonSQS.receiveMessage(request).getMessages();
 
-        StringBuilder response = new StringBuilder();
+        List<String> response = new ArrayList<>();
         for (Message message : messages) {
-            response.append("Received message: ").append(message.getBody()).append("\n");
-
+            StringBuilder stringBuilder = new StringBuilder();
+            response.add(message.getBody());
             // Remove the message from the queue
             amazonSQS.deleteMessage(queueUrl, message.getReceiptHandle());
-//            amazonSQS.deleteMessage(amazonSQS.getQueueUrl(queueName).getQueueUrl(), message.getReceiptHandle());
         }
 
-        return response.toString();
+        return response;
     }
 }
