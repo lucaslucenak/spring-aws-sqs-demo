@@ -19,10 +19,7 @@ public class SqsController {
 
     @GetMapping(value = "/receive-message/{maxNumberOfMessages}")
     public ResponseEntity<List<String>> receiveMessage(@PathVariable Integer maxNumberOfMessages) {
-        List<String> messages = sqsService.receiveMessages(maxNumberOfMessages);
-        System.out.println(messages);
-        System.out.println(maxNumberOfMessages);
-        return ResponseEntity.ok().body(messages);
+        return ResponseEntity.ok().body(sqsService.receiveMessages(maxNumberOfMessages));
     }
 
     @PostMapping(value = "/send-message")
