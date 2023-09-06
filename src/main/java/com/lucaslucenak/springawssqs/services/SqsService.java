@@ -18,9 +18,6 @@ public class SqsService {
     @Autowired
     private AmazonSQS amazonSQS;
 
-    @Value("${aws.sqs.queueName}")
-    private String queueName;
-
     @Value("${aws.sqs.queueUrl}")
     private String queueUrl;
 
@@ -39,12 +36,9 @@ public class SqsService {
 
         List<String> response = new ArrayList<>();
         for (Message message : messages) {
-            StringBuilder stringBuilder = new StringBuilder();
             response.add(message.getBody());
-            // Remove the message from the queue
             amazonSQS.deleteMessage(queueUrl, message.getReceiptHandle());
         }
-
         return response;
     }
 }
